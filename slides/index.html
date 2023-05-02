@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+
+    <title>Using a Rust like type system in TypeScript</title>
+
+    <link rel="stylesheet" href="dist/reset.css" />
+    <link rel="stylesheet" href="dist/reveal.css" />
+    <link rel="stylesheet" href="dist/theme/league.css" id="theme" />
+
+    <!-- Theme used for syntax highlighted code -->
+    <link rel="stylesheet" href="plugin/highlight/monokai.css" id="highlight-theme" />
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <!-- talk slide -->
+        <section>
+          <h1>Using a Rust like type system in TypeScript</h1>
+        </section>
+
+        <!-- intro -->
+        <section>
+          <h2>Hello everyone 👋</h2>
+          <div>
+            I'm Ryan<br />
+            Senior Software Engineer @ Shell Recharge Solutions<br />
+            TypeScript | GraphQL | 4x AWS
+          </div>
+        </section>
+
+        <!-- topics to be covered -->
+        <section>
+          <h2>Topics that we will be covering today</h2>
+          <ul>
+            <li class="fragment fade-up">The concept of throwing errors and its pitfalls</li>
+            <li class="fragment fade-up">How Rust handles this</li>
+            <li class="fragment fade-up">How can we model the same with TypeScript</li>
+            <li class="fragment fade-up">An example of extending this pattern</li>
+          </ul>
+        </section>
+
+        <!-- Errors in JavaScript (the try/catch loop) -->
+        <section>
+          <section>
+            <h3>A basic example</h3>
+            <pre><code data-line-numbers="1-12|1-2|5-8|10-12" data-trim class="language-typescript">
+              try {
+                const data = await api1.getData();
+
+                // a separate api call
+                try {
+                  const anotherData = await api2.getData();
+                } catch (e1) {
+                  console.log(e1);
+                }
+              } catch (e) {
+                console.log(e);
+              }
+            </code></pre>
+          </section>
+
+          <section>
+            <h3>Another common pattern</h3>
+            <pre><code data-line-numbers data-trim class="language-typescript">
+              let data;
+              try {
+                data = await api1.getData();
+
+                // perform other operations on data
+                if (data !== null || data !== undefined) {
+                  // do something with data
+                }
+              } catch (e) {
+                // log this error
+                data = 'defaultValue';
+              }
+
+              return data;
+            </code></pre>
+            <ul>
+              <li class="fragment fade-up">Should be abstracted using functions</li>
+            </ul>
+          </section>
+        </section>
+
+        <!-- How Rust handles this -->
+        <section>
+          <h3>How Rust handles this</h3>
+          <ul>
+            <li class="fragment fade-up">Rust doesn't have the concept of throwing errors</li>
+            <li class="fragment fade-up">No <code>null</code> or <code>undefined</code></li>
+            <li class="fragment fade-up">Rust has two enums for this</li>
+          </ul>
+        </section>
+
+        <!-- The `Option` Type -->
+        <section>
+          <section>
+            <h3><code>Option</code></h3>
+            <pre><code data-line-numbers data-trim class="language-rust">
+              pub enum Option&lt;T&gt; {
+                None,
+                Some(T)
+              }
+            </code></pre>
+          </section>
+
+          <section>
+            <h3>Example</h3>
+            <pre><code data-line-numbers="1-9|2-4|6-7" data-trim data-noescape class="language-rust">
+              fn divide(dividend: i32, divisor: i32) -> Option &lt;i32&gt; {
+                if divisor == 0 {
+                    // Failure is represented as the `None` variant
+                    None
+                } else {
+                    // Result is wrapped in a `Some` variant
+                    Some(dividend / divisor)
+                }
+              }
+            </code></pre>
+          </section>
+
+          <section>
+            <h3>Modelling this in TypeScript 🤔</h3>
+            <ul>
+              <li class="fragment fade-up">
+                <strong>Generics</strong>
+              </li>
+              <li class="fragment fade-up">
+                <strong>Discriminated Unions</strong>
+              </li>
+              <li class="fragment fade-up">
+                <strong>Type Predicates</strong>
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h3>Generics</h3>
+            <pre><code data-line-numbers data-trim data-noescape class="language-typescript">
+              function reverse&lt;T&gt;(items: T[]): T[] {
+                let reversedArray = [];
+                for (let i = items.length - 1; i >= 0; i--) {
+                    reversedArray.push(items[i]);
+                }
+                return reversedArray;
+              }
+            </code></pre>
+          </section>
+
+          <section>
+            <h3>Discriminated Unions</h3>
+            <pre><code data-line-numbers data-trim data-noescape class="language-typescript">
+              type Square = {
+                kind: 'square';
+                size: number;
+              }
+              
+              type Rectangle = {
+                kind: 'rectangle';
+                width: number;
+                height: number;
+              }
+              
+              type Shape = Square | Rectangle;
+            </code></pre>
+          </section>
+
+          <section>
+            <pre><code data-line-numbers="1-10|2-4|6-9" data-trim data-noescape class="language-typescript">
+              function area(s: Shape) {
+                if (s.kind === 'square') {
+                  // Now TypeScript knows that `s` must be a square
+                  return s.size * s.size;
+                }
+                else {
+                  // Not a square? 
+                  // So TypeScript figures out that it's a Rectangle
+                  return s.width * s.height;
+                }
+              }
+            </code></pre>
+          </section>
+
+          <section>
+            <h3>Type Predicates</h3>
+            <pre><code data-line-numbers="1-8|1|2|5|7" data-trim data-noescape class="language-typescript">
+              function isString(x: unknown): x is string {
+                return typeof x === 'string';
+              }
+
+              if (isString(x)) {
+                // Here x is inferred a string
+                return x.split('').reverse().join('');
+              }
+            </code></pre>
+          </section>
+        </section>
+
+        <!-- the `Result` Type -->
+        <section>
+          <section>
+            <h3><code>Result</code></h3>
+            <pre><code data-line-numbers data-trim class="language-rust">
+              pub enum Result&lt;T, E&gt; {
+                Ok(T),
+                Err(E)
+              }
+            </code></pre>
+          </section>
+
+          <section>
+            <h3>Example</h3>
+            <pre><code data-line-numbers data-trim class="language-rust">
+              fn divide(x: i32, y: i32) -> Result&lt;i32, DivisionError&gt; {
+                if y == 0 {
+                    return Err(DivisionError::DivideByZero);
+                }
+                Ok(x / y)
+              }
+            </code></pre>
+          </section>
+        </section>
+
+        <!-- using `unwrap` and `unwrapOr` -->
+        <section>
+          <section><h3>Rust helper methods</h3></section>
+          <section>
+            <h3><code>unwrap</code></h3>
+            <pre><code data-line-numbers data-trim class="language-rust">
+              let x = Some("air");
+              assert_eq!(x.unwrap(), "air");
+
+              // this will fail (rust panic)
+              let x: Option<&str> = None;
+              assert_eq!(x.unwrap(), "air");
+            </code></pre>
+          </section>
+
+          <section>
+            <h3><code>unwrap_or</code></h3>
+            <pre><code data-line-numbers data-trim class="language-rust">
+              assert_eq!(Some("car").unwrap_or("bike"), "car");
+              assert_eq!(None.unwrap_or("bike"), "bike");
+            </code></pre>
+          </section>
+        </section>
+
+        <!-- extending this pattern -->
+        <section>
+          <section>
+            <h3>Extending this further</h3>
+            <ul>
+              <li class="fragment fade-up">Using this with API's (async)</li>
+              <li class="fragment fade-up">With a pattern matching library</li>
+            </ul>
+          </section>
+
+          <section>
+            <h3>Libraries and resources</h3>
+            <ul>
+              <li>
+                <a href="https://github.com/gvergnaud/ts-pattern" rel="noreferrer" target="_blank"
+                  >TS Pattern</a
+                >
+              </li>
+              <li>
+                <a href="https://github.com/vultix/ts-results" rel="noreferrer" target="_blank"
+                  >TS Results</a
+                >
+              </li>
+              <li>
+                <a href="https://doc.rust-lang.org/book/" rel="noreferrer" target="_blank"
+                  >Rust Handbook</a
+                >
+              </li>
+            </ul>
+          </section>
+        </section>
+
+        <!-- the end -->
+        <section>
+          <h2>Thank you :)</h2>
+          <img src="./assets/repository.png" height="200" width="200" />
+          <h3>Reach me @</h3>
+          <ul>
+            <li>
+              <a
+                href="https://www.linkedin.com/in/ryan-dsouza-880522125/"
+                rel="noopener noreferrer"
+                target="_blank"
+                >LinkedIn</a
+              >
+            </li>
+            <li>
+              <a href="https://twitter.com/ryands1701" rel="noopener noreferrer" target="_blank"
+                >ryands1701</a
+              >
+            </li>
+            <li>
+              <a href="https://dev.to/ryands17" rel="noopener noreferrer" target="_blank">Dev.to</a>
+            </li>
+          </ul>
+        </section>
+      </div>
+    </div>
+
+    <script type="module">
+      // More info about initialization & config:
+      // - https://revealjs.com/config/
+      // - https://revealjs.com/initialization/
+      import Reveal from '/dist/reveal.esm.js';
+      import RevealHighlight from '/plugin/highlight/highlight.esm.js';
+      import RevealNotes from '/plugin/notes/notes.esm.js';
+      Reveal.initialize({
+        hash: true,
+        // Learn about plugins: https://revealjs.com/plugins/
+        plugins: [RevealHighlight, RevealNotes],
+      });
+    </script>
+  </body>
+</html>
