@@ -30,7 +30,7 @@
           <div>
             I'm Ryan<br />
             Senior Software Engineer @ Shell Recharge Solutions<br />
-            TypeScript | GraphQL | 4x AWS
+            TypeScript | GraphQL | 4x AWS | Rust (expermimental)
           </div>
         </section>
 
@@ -71,17 +71,15 @@
               let data;
               try {
                 data = await api1.getData();
-
-                // perform other operations on data
-                if (data !== null || data !== undefined) {
-                  // do something with data
-                }
+                // perform other operations
               } catch (e) {
                 // log this error
-                data = 'defaultValue';
+                data = null;
               }
 
-              return data;
+              if (data) {
+                // work with data here
+              }
             </code></pre>
             <ul>
               <li class="fragment fade-up">Should be abstracted using functions</li>
@@ -94,7 +92,9 @@
           <h3>How Rust handles this</h3>
           <ul>
             <li class="fragment fade-up">Rust doesn't have the concept of throwing errors</li>
-            <li class="fragment fade-up">No <code>null</code> or <code>undefined</code></li>
+            <li class="fragment fade-up">
+              No concept of <code>null</code> or <code>undefined</code>
+            </li>
             <li class="fragment fade-up">Rust has two enums for this</li>
           </ul>
         </section>
@@ -102,7 +102,7 @@
         <!-- The `Option` Type -->
         <section>
           <section>
-            <h3><code>Option</code></h3>
+            <h3>The <code>Option</code> enum</h3>
             <pre><code data-line-numbers data-trim class="language-rust">
               pub enum Option&lt;T&gt; {
                 None,
@@ -145,7 +145,7 @@
             <h3>Generics</h3>
             <pre><code data-line-numbers data-trim data-noescape class="language-typescript">
               function reverse&lt;T&gt;(items: T[]): T[] {
-                let reversedArray = [];
+                let reversedArray: T[] = [];
                 for (let i = items.length - 1; i >= 0; i--) {
                     reversedArray.push(items[i]);
                 }
@@ -200,6 +200,9 @@
                 return x.split('').reverse().join('');
               }
             </code></pre>
+            <ul>
+              <li class="fragment fade-up">Let's model the <code>Option</code> type!</li>
+            </ul>
           </section>
         </section>
 
@@ -225,6 +228,9 @@
                 Ok(x / y)
               }
             </code></pre>
+            <ul>
+              <li class="fragment fade-up">Let's model the <code>Result</code> type!</li>
+            </ul>
           </section>
         </section>
 
@@ -249,6 +255,9 @@
               assert_eq!(Some("car").unwrap_or("bike"), "car");
               assert_eq!(None.unwrap_or("bike"), "bike");
             </code></pre>
+            <ul>
+              <li class="fragment fade-up">Let's model this!</li>
+            </ul>
           </section>
         </section>
 
