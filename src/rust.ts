@@ -24,22 +24,22 @@ export const createOption = <T>(fn: () => Maybe<T>): Option<T> => {
 // type Ok<T> = { type: 'Ok'; value: T };
 // const Ok = <T>(value: T): Ok<T> => ({ type: 'Ok', value });
 
-// type Err = { type: 'Error'; err: unknown };
-// const Err = (err: unknown): Err => ({ type: 'Error', err });
+// type Err<E> = { type: 'Error'; err: E };
+// const Err = <E>(err: E): Err<E> => ({ type: 'Error', err });
 
-// type Result<T> = Ok<T> | Err;
+// type Result<T, E> = Ok<T> | Err<E>;
 
-// export const createResult = <T>(fn: () => Maybe<T>): Result<T> => {
+// export const createResult = <T, E>(fn: () => Maybe<T>, error: E): Result<T, E> => {
 //   try {
 //     const arg = fn();
-//     return isArg(arg) ? Ok(arg) : Err(Error());
-//   } catch (error) {
+//     return isArg(arg) ? Ok(arg) : Err(error);
+//   } catch (_error) {
 //     return Err(error);
 //   }
 // };
 
 // export function unwrap<T>(arg: Option<T>): T;
-// export function unwrap<T>(arg: Result<T>): T;
+// export function unwrap<T, E>(arg: Result<T, E>): T;
 // export function unwrap<T>(arg: any): T {
 //   if (arg.type === 'Some') return arg.value;
 //   if (arg.type === 'Ok') return arg.value;
@@ -51,7 +51,7 @@ export const createOption = <T>(fn: () => Maybe<T>): Option<T> => {
 // }
 
 // export function unwrapOr<T>(arg: Option<T>, defaultValue: T): T;
-// export function unwrapOr<T>(arg: Result<T>, defaultValue: T): T;
+// export function unwrapOr<T, E>(arg: Result<T, E>, defaultValue: T): T;
 // export function unwrapOr<T>(arg: any, defaultValue: T): T {
 //   try {
 //     return unwrap(arg);
@@ -60,11 +60,14 @@ export const createOption = <T>(fn: () => Maybe<T>): Option<T> => {
 //   }
 // }
 
-// export const createAsyncResult = async <T>(fn: () => Promise<Maybe<T>>): Promise<Result<T>> => {
+// export const createAsyncResult = async <T, E>(
+//   fn: () => Promise<Maybe<T>>,
+//   error: E
+// ): Promise<Result<T, E>> => {
 //   try {
 //     const val = await fn();
-//     return createResult(() => val);
-//   } catch (error) {
+//     return createResult(() => val, error);
+//   } catch (_error) {
 //     return Err(error);
 //   }
 // };
