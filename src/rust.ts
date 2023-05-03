@@ -9,12 +9,12 @@ const None = (): None => ({ type: 'None' });
 
 type Option<T> = Some<T> | None;
 
-const isValue = <T>(val: Maybe<T>): val is T => val !== null && val !== undefined;
+const stripNullAndUndefined = <T>(val: Maybe<T>): val is T => val !== null && val !== undefined;
 
 export const createOption = <T>(fn: () => Maybe<T>): Option<T> => {
   try {
     const value = fn();
-    return isValue(value) ? Some(value) : None();
+    return stripNullAndUndefined(value) ? Some(value) : None();
   } catch (error) {
     return None();
   }
@@ -32,7 +32,7 @@ export const createOption = <T>(fn: () => Maybe<T>): Option<T> => {
 // export const createResult = <T, E>(fn: () => Maybe<T>, error: E): Result<T, E> => {
 //   try {
 //     const value = fn();
-//     return isValue(value) ? Ok(value) : Err(error);
+//     return stripNullAndUndefined(value) ? Ok(value) : Err(error);
 //   } catch (_error) {
 //     return Err(error);
 //   }
