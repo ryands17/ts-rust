@@ -1,3 +1,5 @@
+import { F } from 'ts-toolbelt';
+
 type Maybe<T> = T | null | undefined;
 
 // The "Option" type
@@ -50,9 +52,9 @@ export function unwrap<T>(arg: any): T {
   throw Error('Cannot unwrap value!');
 }
 
-export function unwrapOr<T>(arg: Option<T>, defaultValue: T): T;
-export function unwrapOr<T, E>(arg: Result<T, E>, defaultValue: T): T;
-export function unwrapOr<T>(arg: any, defaultValue: T): T {
+export function unwrapOr<T>(arg: Option<T>, defaultValue: F.NoInfer<T>): T;
+export function unwrapOr<T, E>(arg: Result<T, E>, defaultValue: F.NoInfer<T>): T;
+export function unwrapOr<T>(arg: any, defaultValue: F.NoInfer<T>): T {
   try {
     return unwrap(arg);
   } catch (e) {

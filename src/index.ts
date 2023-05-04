@@ -31,17 +31,17 @@ const users = await rust.createAsyncResult(
   'users not found'
 );
 
-// if (users.type === 'Ok') {
-//   console.log('\n\nusers', users.value);
-// }
+if (users.type === 'Ok') {
+  console.log('\n\nusers', users.value);
+}
 
-// console.log(
-//   '\n\n\nusers',
-//   rust.unwrapOr(users, [
-//     { id: 2, name: 'Ryan' },
-//     { id: 1, name: 'John' },
-//   ])
-// );
+console.log(
+  '\n\n\nusers',
+  rust.unwrapOr(users, [
+    { id: 2, name: 'Ryan' },
+    { id: 1, name: 'John' },
+  ])
+);
 
 // with ts-pattern
 match(users)
